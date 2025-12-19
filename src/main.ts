@@ -7,8 +7,8 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle("Excel API")
-    .setDescription("API for reading Excel files from the data directory")
+    .setTitle("Data API")
+    .setDescription("API for reading CSV files from the data directory")
     .setVersion("1.0")
     .build();
   const document = SwaggerModule.createDocument(app, config);
@@ -16,4 +16,7 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error("Failed to start application:", err);
+  process.exit(1);
+});

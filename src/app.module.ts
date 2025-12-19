@@ -2,7 +2,8 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { ExcelModule } from "./excel/excel.module";
+import { DataModule } from "./data/data.module";
+import { EmbeddingsModule } from "./embeddings/embeddings.module";
 
 @Module({
   imports: [
@@ -10,7 +11,8 @@ import { ExcelModule } from "./excel/excel.module";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    ExcelModule,
+    DataModule,
+    EmbeddingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

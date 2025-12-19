@@ -1,4 +1,4 @@
-export interface ExcelFileResponse {
+export interface DataFileResponse {
   filename: string;
   sheetName: string;
   rowCount: number;
