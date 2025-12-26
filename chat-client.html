@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pakistan Import/Export Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+        
+        .user-message {
+            background: #667eea;
+            color: white;
+            margin-left: 20%;
+        }
+        
+        .assistant-message {
+            background: white;
+            border: 1px solid #e0e0e0;
+            margin-right: 20%;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .option {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .option label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .option input {
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .example-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .example-btn {
+            padding: 8px 12px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .stats {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇵🇰 Pakistan Import/Export Chat</h1>
+        <p class="subtitle">Ask questions about trade data using AI</p>
+        
+        <div class="example-questions">
+            <button class="example-btn" onclick="setQuestion('What are the import records for live animals?')">Live animals</button>
+            <button class="example-btn" onclick="setQuestion('Show me imports from Dubai')">Dubai imports</button>
+            <button class="example-btn" onclick="setQuestion('What products come from Poland?')">Poland products</button>
+            <button class="example-btn" onclick="setQuestion('List imports with highest PKR values')">High value imports</button>
+        </div>
+        
+        <div class="chat-container" id="chatContainer"></div>
+        
+        <div class="options">
+            <div class="option">
+                <label>Top K Results</label>
+                <input type="number" id="topK" value="5" min="1" max="20">
+            </div>
+            <div class="option">
+                <label>Max Tokens</label>
+                <input type="number" id="maxTokens" value="1000" min="100" max="4000">
+            </div>
+            <div class="option">
+                <label>Temperature</label>
+                <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="userInput" 
+                placeholder="Ask about Pakistan's import/export data..."
+                onkeypress="if(event.key === 'Enter') sendMessage()"
+            >
+            <button id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        let isStreaming = false;
+
+        function setQuestion(question) {
+            document.getElementById('userInput').value = question;
+        }
+
+        function addMessage(content, isUser = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            messageDiv.textContent = content;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv;
+        }
+
+        async function sendMessage() {
+            if (isStreaming) return;
+
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+
+            const topK = parseInt(document.getElementById('topK').value);
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+
+            // Add user message
+            addMessage(message, true);
+            userInput.value = '';
+
+            // Disable input
+            isStreaming = true;
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = 'Streaming<span class="loading"></span>';
+
+            try {
+                // Use non-streaming endpoint for simplicity
+                const response = await fetch(`${API_BASE}/chat/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message,
+                        topK,
+                        maxTokens,
+                        temperature,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const assistantMessage = addMessage(data.response);
+                
+                // Add stats
+                const stats = document.createElement('div');
+                stats.className = 'stats';
+                stats.textContent = `⏱️ ${data.responseTime}ms • 📚 ${data.contextsUsed} contexts used`;
+                assistantMessage.appendChild(stats);
+
+            } catch (error) {
+                addMessage(`Error: ${error.message}`);
+            } finally {
+                isStreaming = false;
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            }
+        }
+
+        // Show welcome message
+        window.onload = () => {
+            addMessage('👋 Welcome! Ask me anything about Pakistan\'s import and export data. Try the example questions above or type your own.');
+        };
+    </script>
+</body>
+</html>

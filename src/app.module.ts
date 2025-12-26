@@ -4,6 +4,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { DataModule } from "./data/data.module";
 import { EmbeddingsModule } from "./embeddings/embeddings.module";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { EmbeddingsModule } from "./embeddings/embeddings.module";
     }),
     DataModule,
     EmbeddingsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
